@@ -1,0 +1,116 @@
+Sub main()
+Stkvolume
+stockprice
+totaldashboard
+End Sub
+
+Sub Stkvolume()
+
+
+
+         Dim tickername As String
+         Dim prevticker As String
+         Dim stktotal As Double
+         stktotal = 0
+         ' row index in summary table
+         Dim SumRow As Double
+    For Each ws In Worksheets
+         SumRow = 2
+         ' Loop through all tickers
+         Dim lastRow As Double
+            ws.Range("i1") = "Ticker"
+            ws.Range("l1") = "Total Stock Colume"
+        
+        lastRow = Cells(Rows.Count, 1).End(xlUp).Row
+         'Debug.Print (lastRow)
+         
+         prevticker = ws.Cells(2, 1).Value
+         
+         For i = 2 To lastRow + 1
+           
+                 tickername = ws.Cells(i, 1).Value
+                Debug.Print (i)
+            If tickername = prevticker Then
+                'Add to the ticker Total
+                stktotal = stktotal + ws.Cells(i, 7).Value
+           Else
+          
+                ws.Range("i1").Cells(SumRow, 1).Value = prevticker
+                ' Print the Brand Amount to the Summary Table
+                ws.Range("i1").Cells(SumRow, 4).Value = stktotal
+                ' Add one to the summary table row
+                SumRow = SumRow + 1
+                ' Start the new Brand Total
+                stktotal = 0
+                prevticker = tickername
+             
+            End If
+        Next i
+    Next ws
+End Sub
+
+Sub stockprice()
+
+
+Dim stock_first As Double
+Dim Summary_Table_Row As Double
+Dim stock_last As Double
+Dim stock_count As Double
+Dim stock_change As Double
+For Each ws In Worksheets
+   ws.Select
+   Cells(1, 10) = "Yearly Change"
+   Cells(1, 11) = "% Change"
+   Summary_Table_Row = 2
+   last_row = ws.Cells(Rows.Count, "A").End(xlUp).Row
+   For i = 2 To last_row
+       If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+           stock_count = (stock_count + Cells(i, 1).Count) - 1
+           stock_first = Cells(i - stock_count, 3).Value
+           stock_last = Cells(i, 6).Value
+           stock_change = stock_last - stock_first
+           Range("J" & Summary_Table_Row).Value = stock_change
+           If stock_first <> 0 Then
+               Range("K" & Summary_Table_Row).Value = stock_change / stock_first
+           Else
+               Range("K" & Summary_Table_Row).Value = 0
+           End If
+           Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+           If Range("J" & Summary_Table_Row).Value < 0 Then
+               Range("J" & Summary_Table_Row).Interior.Color = vbRed
+           Else
+               Range("J" & Summary_Table_Row).Interior.Color = vbGreen
+           End If
+           Summary_Table_Row = Summary_Table_Row + 1
+           stock_count = 0
+       Else
+       stock_count = stock_count + Cells(i, 3).Count
+      End If
+   Next i
+Next ws
+End Sub
+Sub totaldashboard()
+
+For Each ws In Worksheets
+
+
+
+   ws.Select
+   Cells(2, 15) = "Greatest % increasee"
+   Cells(3, 15) = "Greatest % decrease"
+   Cells(4, 15) = "Greatest total volume"
+   Cells(1, 16) = "Ticker"
+   Cells(1, 17) = "Value"
+   
+   last_row = Cells(Rows.Count, 11).End(xlUp).Row
+   Cells(2, 17).Value = WorksheetFunction.Max(Range("K1:K" & last_row))
+   Cells(3, 17).Value = WorksheetFunction.Min(Range("K1:K" & last_row))
+   Cells(4, 17).Value = WorksheetFunction.Max(Range("l1:l" & last_row))
+
+   Cells(2, 17).NumberFormat = "0.00%"
+   Cells(3, 17).NumberFormat = "0.00%"
+   Cells(4, 17).NumberFormat = "0,000"
+
+    
+Next ws
+End Sub
